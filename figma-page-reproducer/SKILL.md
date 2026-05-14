@@ -37,7 +37,7 @@ Use the bundled helper script when driving an authenticated Chrome tab via the C
 ```powershell
 node path\to\skill\scripts\cdp-page-tools.mjs eval --target-host example.com --expr "({url: location.href, title: document.title})"
 node path\to\skill\scripts\cdp-page-tools.mjs preprocess-icons-png --target-host example.com
-node path\to\skill\scripts\cdp-page-tools.mjs hide-text --target-host example.com --text "鐢虫姤鎿嶄綔鏁欑▼" --text "瑙傜湅鏁欑▼" --min-x 900 --min-y 650
+node path\to\skill\scripts\cdp-page-tools.mjs hide-text --target-host example.com --text "申报操作教程" --text "观看教程" --min-x 900 --min-y 650
 node path\to\skill\scripts\cdp-page-tools.mjs screenshot --target-host example.com --out artifacts/page-full.png --viewport-width 1440 --viewport-height 900
 node path\to\skill\scripts\cdp-page-tools.mjs submit-figma-capture --target-host example.com --capture-id <id> --endpoint <endpoint>
 ```
