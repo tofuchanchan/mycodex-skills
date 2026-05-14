@@ -1,6 +1,6 @@
 ---
 name: figma-page-reproducer
-description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, full-page scrolling, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
+description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability/scope choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, effective business-content height detection, full-page or current-viewport capture decisions, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, watermark exclusion, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
 ---
 
 # Figma Page Reproducer
@@ -14,7 +14,10 @@ Create a Figma prototype from the actual rendered web page, not from imagination
 1. Confirm inputs: target page URL, target Figma file URL/key, scope, viewport, and whether the user will log in manually.
 2. Verify the active Figma account with `whoami`. If multiple Figma MCP namespaces are available, use the one whose email matches the user's expected account.
 3. Open a visible Chrome page with remote debugging when manual login is required. Let the user log in, then continue from that same authenticated tab.
-4. Inspect the live page dimensions, scroll containers, and icon sources before capture.
+4. Inspect the live page dimensions, scroll containers, effective business-content bounds, watermark overlays, and icon sources before capture.
+   - Run `analyze-effective-bounds` for admin/SaaS pages before choosing frame height.
+   - Do not blindly use `documentElement.scrollHeight`, `body.scrollHeight`, or `#app.scrollHeight` as the Figma frame height. These often include side navigation, footers, watermark overlays, and other shell content that should not define a page prototype.
+   - If the analysis recommends `current-viewport`, use the requested desktop viewport height, usually `900`, unless the user explicitly wants full shell scroll.
 5. If the page or a primary inner container is significantly taller than the viewport, stop and offer the user a scope choice before capture. Do not hard-code a full-page or first-screen strategy for long list/detail pages.
    - If editability is required, do not use a full-page screenshot as the fallback. Split the page into editable modules and rebuild failed modules with Figma primitives/components.
 6. Preprocess icons before Figma capture:
@@ -22,14 +25,15 @@ Create a Figma prototype from the actual rendered web page, not from imagination
    - Rasterize visible inline SVG and iconfont symbols to PNG data URLs in the browser.
    - Convert Ant Design menu arrows or pseudo-element arrows to real PNG image nodes.
    - Verify `blankAfterRasterize = 0` or explain any intentional white-on-color icons.
-7. Hide unrelated transient overlays that were not part of the requested state, such as tutorials, chat popups, cookie banners, or onboarding tips.
-8. Capture a local screenshot for the chosen scope as the pixel reference and visually inspect it before sending anything to Figma.
-9. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for normal-size editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved. For very long pages that require editability, skip whole-page capture and use the editable long-page strategy instead.
-10. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
-11. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
-12. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
-13. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, scroll height, missing images, accidental overlays, and obvious layout drift.
-14. Clean up local capture artifacts after validation so one-off browser profiles, helper scripts, logs, and process screenshots do not linger in the repo.
+7. Hide unrelated transient overlays that were not part of the requested state, such as tutorials, chat popups, cookie banners, onboarding tips, theme/config drawers, and dev-only panels.
+8. Hide product watermarks before screenshot/capture. Admin systems often display username watermarks for security; they are real in the page but usually noise in a prototype unless the user explicitly asks to preserve them.
+9. Capture a local screenshot for the chosen scope as the pixel reference and visually inspect it before sending anything to Figma.
+10. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for normal-size editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved. For very long pages that require editability, skip whole-page capture and use the editable long-page strategy instead.
+11. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
+12. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
+13. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
+14. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, effective height, missing images, accidental overlays/watermarks, and obvious layout drift.
+15. Clean up local capture artifacts after validation so one-off browser profiles, helper scripts, logs, and process screenshots do not linger in the repo.
 
 ## Tooling Pattern
 
@@ -37,6 +41,8 @@ Use the bundled helper script when driving an authenticated Chrome tab via the C
 
 ```powershell
 node path\to\skill\scripts\cdp-page-tools.mjs eval --target-host example.com --expr "({url: location.href, title: document.title})"
+node path\to\skill\scripts\cdp-page-tools.mjs analyze-effective-bounds --target-host example.com --viewport-height 900
+node path\to\skill\scripts\cdp-page-tools.mjs hide-watermarks --target-host example.com
 node path\to\skill\scripts\cdp-page-tools.mjs preprocess-icons-png --target-host example.com
 node path\to\skill\scripts\cdp-page-tools.mjs hide-text --target-host example.com --text "申报操作教程" --text "观看教程" --min-x 900 --min-y 650
 node path\to\skill\scripts\cdp-page-tools.mjs screenshot --target-host example.com --out artifacts/page-full.png --viewport-width 1440 --viewport-height 900
@@ -44,6 +50,37 @@ node path\to\skill\scripts\cdp-page-tools.mjs submit-figma-capture --target-host
 ```
 
 Use `--cdp-port` if Chrome was launched on a non-default port. If a helper needs adjustment for a specific app, patch the script rather than rewriting fragile CDP code in chat.
+
+## Effective Viewport Height
+
+For admin and SaaS pages, distinguish **shell height** from **business-content height**. Sidebars, footers, watermarks, drawers, and hidden menus can make `#app.scrollHeight` much larger than the visible business page. A Figma prototype should normally use the effective business viewport, not the shell's full scroll height.
+
+Run:
+
+```powershell
+node path\to\skill\scripts\cdp-page-tools.mjs analyze-effective-bounds --target-host example.com --viewport-height 900
+```
+
+Use the returned data this way:
+
+- `meaningfulBottom`: bottom edge of visible, non-ignored business content.
+- `recommendedFrameHeight`: frame height after adding a small buffer; if it is `900` or near the requested viewport, use a `1440 x 900` style frame.
+- `ignoredBottomElements`: explains what would have inflated height, such as side navigation, footer, drawers, or watermark containers.
+- `scrollCandidates`: identifies real document or inner scroll containers. If the primary business container is over `4x` viewport height or over `6000px`, ask for scope and consider segmented/module reconstruction.
+
+If the table/form/card content ends near the viewport bottom but a sidebar or footer continues far below, create a current-viewport prototype and mention that the full shell scroll was intentionally ignored. Do not create a tall blank frame just because `#app.scrollHeight` is tall.
+
+## Watermark Handling
+
+Backend systems often add security watermarks such as repeated usernames. Treat these as capture noise by default.
+
+Before screenshots and Figma capture, run:
+
+```powershell
+node path\to\skill\scripts\cdp-page-tools.mjs hide-watermarks --target-host example.com
+```
+
+Then verify screenshots and Figma output contain no repeated watermark nodes/text. Preserve account names in the actual header/avatar area; only remove repeated low-emphasis page watermarks or watermark containers. If the user explicitly asks to keep watermarks for compliance review, keep them and label the decision in the final response.
 
 ## Long Page Scope Choices
 
@@ -191,11 +228,12 @@ Before final response, confirm:
 
 - Figma account is the expected account.
 - Captured frame has the requested viewport width, usually `1440`.
-- Full page height matches `document.documentElement.scrollHeight`; if more than one screen, capture full scroll height.
-- If the page uses an inner scroll container, validation uses that container's `scrollHeight`, not only `document.documentElement.scrollHeight`.
+- Frame height follows the selected scope. For admin list/form pages, report the effective business-content height decision instead of claiming it matches `scrollHeight`.
+- If the page uses an inner scroll container, validation uses that container's `scrollHeight` and the `analyze-effective-bounds` result, not only `document.documentElement.scrollHeight`.
 - For module-split deliverables, the final frame reports section count, item/card sample count, and confirms whether bitmap image fills were avoided.
 - A pixel reference screenshot exists or the editable capture has been visually inspected.
 - Main icons are visible in the Figma screenshot, not empty image boxes.
+- Repeated page watermarks are absent unless explicitly requested.
 - No accidental tutorial/chat/cookie overlay is present unless requested.
 - Final answer links directly to the new Figma node and names the frame.
 
@@ -209,6 +247,8 @@ Before final response, confirm:
 - **Figma enum validation errors**: normalize enum values to Figma's expected uppercase values.
 - **Target node is not a container**: inspect parent chain and place the generated board as a sibling/top-level frame instead of nesting into text/vector nodes.
 - **Blank icon images**: rasterize resolved symbols to PNG, not SVG data URLs.
+- **Blank lower half**: shell scroll height was probably used as prototype height. Re-run `analyze-effective-bounds`, ignore sidebars/footer/watermarks/drawers, and rebuild or resize to the effective viewport.
+- **Watermark pollution**: run `hide-watermarks` before capture and remove any generated `watermark / <user>` nodes from structured Figma output.
 - **Page state changed after refresh**: restore the requested UI state before capture.
 - **Floating overlay appeared**: hide it and recapture.
 - **Text mojibake in CDP JSON**: visual screenshot is authoritative; do not infer page quality from garbled console output.
