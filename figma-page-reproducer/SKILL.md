@@ -1,6 +1,6 @@
 ---
 name: figma-page-reproducer
-description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, full-page scrolling, desktop viewport capture, Figma html-to-design capture, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
+description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, full-page scrolling, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
 ---
 
 # Figma Page Reproducer
@@ -16,6 +16,7 @@ Create a Figma prototype from the actual rendered web page, not from imagination
 3. Open a visible Chrome page with remote debugging when manual login is required. Let the user log in, then continue from that same authenticated tab.
 4. Inspect the live page dimensions, scroll containers, and icon sources before capture.
 5. If the page or a primary inner container is significantly taller than the viewport, stop and offer the user a scope choice before capture. Do not hard-code a full-page or first-screen strategy for long list/detail pages.
+   - If editability is required, do not use a full-page screenshot as the fallback. Split the page into editable modules and rebuild failed modules with Figma primitives/components.
 6. Preprocess icons before Figma capture:
    - Resolve `<svg><use href="#icon-...">` into real `symbol/path` content.
    - Rasterize visible inline SVG and iconfont symbols to PNG data URLs in the browser.
@@ -23,7 +24,7 @@ Create a Figma prototype from the actual rendered web page, not from imagination
    - Verify `blankAfterRasterize = 0` or explain any intentional white-on-color icons.
 7. Hide unrelated transient overlays that were not part of the requested state, such as tutorials, chat popups, cookie banners, or onboarding tips.
 8. Capture a local screenshot for the chosen scope as the pixel reference and visually inspect it before sending anything to Figma.
-9. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for the editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved.
+9. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for normal-size editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved. For very long pages that require editability, skip whole-page capture and use the editable long-page strategy instead.
 10. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
 11. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
 12. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
@@ -53,8 +54,102 @@ For pages with long document scroll or large inner scroll containers, ask the us
 - **Segmented frames**: best for long product lists, dashboards, and inner-scroll containers. Capture consecutive viewport chunks as separate labeled frames, for example `Buy page - segment 01`, `segment 02`.
 - **Full long frame**: only use when the page is reasonably sized and the user explicitly wants a single tall frame. Warn that very tall pages can be slow, heavy, and less editable in Figma.
 - **Representative sample**: best for repetitive lists. Capture filters/header plus the first N rows/cards and one or two representative variants instead of thousands of repeated items.
+- **Editable module split**: required when the user says Figma editability cannot be compromised. Detect repeated sections/cards from DOM, create separate labeled frames per module, and draw text, cards, buttons, tabs, filters, and layout with editable Figma nodes.
 
 When an inner scroll container is the primary content surface, report its selector or identifying class/id, viewport height, and scroll height. Do not assume `document.documentElement.scrollHeight` tells the whole story.
+
+## Editable Long-Page Strategy
+
+For very long pages, especially catalog/list pages with repeated cards, do not submit the whole page to `generate_figma_design`.
+
+1. Detect the module boundaries from DOM selectors, layout roles, repeated class names, or visible headings.
+2. Extract a compact data model: navigation shell, filter rows, section headings, item counts, representative card text/prices/tags/states, and key button labels.
+3. Generate a Figma board with separate editable frames:
+   - first viewport shell;
+   - reusable filter/header module;
+   - one frame per repeated business section;
+   - card state/component anatomy when useful.
+4. Keep repeated lists sampled. Do not create hundreds or thousands of identical cards unless the user explicitly asks for full coverage.
+5. If `generate_figma_design` succeeds for a small module, it may be used as a layout reference. If it times out or creates a bitmap-heavy/raw capture, replace it with structured Figma nodes.
+6. When a module cannot be auto-captured, fall back to structured reconstruction with Figma primitives, text nodes, and reusable components. Do not fall back to a full-frame screenshot unless the user explicitly asks for a pixel reference.
+
+For editable-delivery tasks, screenshots are allowed only as a temporary local reference or as a separately labeled `Pixel reference`. They are not an acceptable replacement for the editable deliverable.
+
+Use this strategy by default when any of these are true:
+
+- the primary scroll surface is an inner container over `4x` the viewport height or over `6000px`;
+- the page contains hundreds of repeated list/card/table items;
+- the user says editability cannot be compromised;
+- `generate_figma_design` for the whole page is still pending/processing after one reasonable submit/poll cycle.
+
+Do not wait on a stuck whole-page capture while the user is expecting progress. Continue with module extraction and structured Figma generation. Keep polling or clean up the old capture separately so a late result does not pollute the final canvas.
+
+## Module Extraction Pattern
+
+When splitting a long page, extract data from the authenticated DOM before drawing in Figma.
+
+Suggested compact model:
+
+```json
+{
+  "meta": {
+    "url": "...",
+    "innerScroller": "#contentBoxer",
+    "scrollHeight": 50603,
+    "sectionCount": 32,
+    "totalCards": 1172
+  },
+  "nav": { "side": ["..."], "top": ["..."] },
+  "filters": { "types": ["..."], "countries": ["..."] },
+  "sections": [
+    {
+      "title": "英国",
+      "cardCount": 32,
+      "cards": [
+        {
+          "name": "商品名",
+          "price": "￥900/年起",
+          "oldPrice": "￥1280/年起",
+          "tag": "买送",
+          "disabled": false,
+          "consult": false
+        }
+      ]
+    }
+  ]
+}
+```
+
+Draw the compact model as editable Figma nodes:
+
+- one first-viewport shell frame;
+- one reusable filter/header frame;
+- one labeled frame per repeated business section;
+- representative item/card frames with text, buttons, badges, disabled state, consultation state, and promo state;
+- optional component anatomy frame showing card states.
+
+For list/card pages, sample the first major section more heavily, then sample each additional section lightly unless the user asks for full coverage. Always report the sampling policy in the final response.
+
+## Figma API Implementation Notes
+
+`use_figma` runs inside a constrained plugin sandbox. Avoid assuming browser or Node APIs exist.
+
+- Always load and pass the `figma-use` skill before `use_figma`.
+- `fetch` may be unavailable. Do not depend on a local HTTP server from inside `use_figma`.
+- If data is too large to inline in one script, store compact JSON in `setSharedPluginData(namespace, key, value)` first, then read it in a second `use_figma` call.
+- Use valid Figma enum values, for example `CENTER`, `LEFT`, `RIGHT`; CSS-style lowercase values like `center` fail validation.
+- Load fonts before creating/editing text. Prefer available CJK-capable fonts such as `Noto Sans SC` when the original web font is not available.
+- If the Figma URL node id points to a text node or leaf node, inspect the parent chain and create the new prototype as a sibling/top-level board near the intended area. Do not append a full screen into a text node.
+- Return all created and removed node IDs from each write call.
+
+## Capture Queue Hygiene
+
+Figma capture jobs can complete late. Treat old capture IDs as possible delayed side effects.
+
+- If a whole-page or screenshot/reference capture was started and the final deliverable switches to editable module reconstruction, continue checking that capture ID briefly.
+- If a delayed raw capture creates a node and it is not part of the accepted deliverable, delete it immediately.
+- Keep the final canvas free of stale bitmap/reference captures unless the user explicitly wants a pixel reference.
+- Mention any still-processing capture ID only as residual risk when it has not produced a node by final cleanup time.
 
 ## Figma Capture Rules
 
@@ -63,6 +158,7 @@ When an inner scroll container is the primary content surface, report its select
 - Always use `figma-use` before `use_figma` calls.
 - `generate_figma_design` captures raw frames. If the user wants reusable production-quality prototypes later, replace repeated controls with design-system components after the raw capture is accepted.
 - Rename captured nodes immediately. Default names like `uat`, `Body`, and `Container` are useless.
+- Do not use bitmap screenshots as a fallback when the requested deliverable must be editable. Use screenshots only as explicit pixel references.
 
 ## Local Artifact Cleanup
 
@@ -96,6 +192,8 @@ Before final response, confirm:
 - Figma account is the expected account.
 - Captured frame has the requested viewport width, usually `1440`.
 - Full page height matches `document.documentElement.scrollHeight`; if more than one screen, capture full scroll height.
+- If the page uses an inner scroll container, validation uses that container's `scrollHeight`, not only `document.documentElement.scrollHeight`.
+- For module-split deliverables, the final frame reports section count, item/card sample count, and confirms whether bitmap image fills were avoided.
 - A pixel reference screenshot exists or the editable capture has been visually inspected.
 - Main icons are visible in the Figma screenshot, not empty image boxes.
 - No accidental tutorial/chat/cookie overlay is present unless requested.
@@ -105,6 +203,11 @@ Before final response, confirm:
 
 - **Figma account mismatch**: call all available `whoami` tools; use the namespace with the correct email.
 - **Submit command timeout**: poll the capture ID anyway.
+- **Late capture pollution**: a previously started capture may finish after the structured result is done. Delete stale nodes that are not part of the accepted deliverable.
+- **Unbounded long-page capture**: do not send huge inner-scroll pages as one capture. Switch to editable module split.
+- **`use_figma` sandbox API mismatch**: browser APIs such as `fetch` may not exist; use inline compact data or shared plugin data.
+- **Figma enum validation errors**: normalize enum values to Figma's expected uppercase values.
+- **Target node is not a container**: inspect parent chain and place the generated board as a sibling/top-level frame instead of nesting into text/vector nodes.
 - **Blank icon images**: rasterize resolved symbols to PNG, not SVG data URLs.
 - **Page state changed after refresh**: restore the requested UI state before capture.
 - **Floating overlay appeared**: hide it and recapture.
