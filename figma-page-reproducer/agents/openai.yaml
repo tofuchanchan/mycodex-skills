@@ -1,0 +1,4 @@
+interface:
+  display_name: "Figma Page Reproducer"
+  short_description: "Reproduce logged-in web pages in Figma with icon-safe capture."
+  default_prompt: "Reproduce this web page into Figma as a static prototype, preserving full-page layout and icons."
