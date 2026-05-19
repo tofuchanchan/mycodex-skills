@@ -1,4 +1,4 @@
 interface:
   display_name: "Figma Page Reviser"
-  short_description: "Revise Figma pages with scoped edits, clean layers, style parity, and artifact QA."
-  default_prompt: "Revise this reproduced Figma page, only changing the requested areas while preserving semantic layer groups, matching similar modules, and checking text fit plus visual artifacts."
+  short_description: "Revise Figma pages with scoped edits, OST admin/user standards, clean layers, style parity, and artifact QA."
+  default_prompt: "Revise this reproduced Figma page, only changing the requested areas while preserving semantic layer groups, detecting whether it is OST后台/admin or OST商户端/user, applying ost-admin-system-guidelines or ost-user-system-guidelines as appropriate, matching similar modules, and checking text fit plus visual artifacts."

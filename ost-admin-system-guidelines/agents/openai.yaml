@@ -1,0 +1,4 @@
+interface:
+  display_name: "OST系统设计规范"
+  short_description: "OST后台管理系统原型图设计规范，包含颜色、字体、组件、布局和交互规范"
+  default_prompt: "使用OST系统设计规范来绘制系统原型图，确保风格、样式和交互与OST后台系统保持一致。"

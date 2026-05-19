@@ -1,6 +1,6 @@
 ---
 name: figma-page-reviser
-description: Revise an existing Figma page or frame, especially one created by figma-page-reproducer, with scoped edits, semantic layer organization, explicit user confirmation, suggestion-by-suggestion approval, and post-edit design QA. Use when the user asks Codex to modify, adjust, refine, revise, optimize, or review a reproduced Figma page while preserving untouched areas, deciding whether to copy or edit the original frame, identifying internal-admin vs merchant-facing page standards, maintaining layout-based Figma layer grouping, checking similar-module style consistency, auditing semantic colors, and removing accidental capture artifacts such as wrong black strokes after changes.
+description: Revise an existing Figma page or frame, especially one created by figma-page-reproducer, with scoped edits, semantic layer organization, explicit user confirmation, suggestion-by-suggestion approval, and post-edit design QA. Use when the user asks Codex to modify, adjust, refine, revise, optimize, or review a reproduced Figma page while preserving untouched areas, deciding whether to copy or edit the original frame, identifying OST后台/admin vs OST商户端/user page standards, applying ost-admin-system-guidelines or ost-user-system-guidelines as appropriate, maintaining layout-based Figma layer grouping, checking similar-module style consistency, auditing semantic colors, and removing accidental capture artifacts such as wrong black strokes after changes.
 ---
 
 # Figma Page Reviser
@@ -13,13 +13,14 @@ This skill is intended to run after `figma-page-reproducer`, but it also applies
 
 ## Required Workflow
 
-1. Confirm inputs: target Figma file URL/key, target node/frame, requested changes, and whether the page came from `figma-page-reproducer`.
-2. Load `references/scope-contract.md` and create a concise modification contract.
-3. Ask the user to confirm the contract before editing. Include the required question: copy the frame first, or directly modify the original?
-4. Identify page type before applying standards:
-   - For internal admin/operations/backend pages, use `ost-system-guidelines` when available.
-   - For merchant-facing/customer-facing pages, preserve the current page's design system unless the user gives another standard.
-   - If page type is unclear, ask the user to confirm.
+1. Confirm inputs: target Figma file URL/key, target node/frame, requested changes, source page URL when available, and whether the page came from `figma-page-reproducer`.
+2. Load `references/page-type-detection.md` and identify page type before drafting the edit contract:
+   - For OST internal admin/operations/backend pages, use `ost-admin-system-guidelines`.
+   - For OST merchant-facing/user/customer pages, use `ost-user-system-guidelines`.
+   - Treat URL/domain and app shell as stronger evidence than table density. For example, `uat-user.evatmaster.com` is merchant/user even when it contains dense VAT tables.
+   - If page type is unclear, ask the user to confirm before using a design standard for revisions or QA.
+3. Load `references/scope-contract.md` and create a concise modification contract that records the detected page type and selected design standard.
+4. Ask the user to confirm the contract before editing. Include the required question: copy the frame first, or directly modify the original? If page type is unclear, include the admin/user standard choice in the same confirmation.
 5. Before any Figma write action, read current metadata and take or request a screenshot for the target node. Identify existing semantic layer groups for the requested edit area.
 6. Use `figma-use` before every `use_figma` write or inspection call.
 7. Load `references/layer-organization.md` before creating, moving, deleting, or regrouping Figma nodes. Execute only the user-approved modifications in the approved node or coordinate range, and place new or changed nodes in the matching semantic group instead of flattening them at the frame root.
@@ -34,8 +35,9 @@ This skill is intended to run after `figma-page-reproducer`, but it also applies
 ## Hard Gates
 
 - Do not edit until the user confirms whether to copy the frame or directly modify the original.
+- Do not edit until the page type and selected design standard are recorded, or explicitly confirmed when unclear.
 - Do not execute inferred or "helpful" additions until the user approves each item.
-- Do not apply `ost-system-guidelines` to merchant-facing/customer-facing pages unless the user explicitly requests it.
+- Do not apply `ost-admin-system-guidelines` to merchant/user pages, and do not apply `ost-user-system-guidelines` to internal admin pages. Classify first; if genuinely unclear, ask.
 - Do not change navigation, sidebar, header, footer, unrelated tables, unrelated modals, or global styles unless they are part of the confirmed scope.
 - Do not silently resize the top-level frame, change page-wide spacing, or restyle repeated components outside the approved area.
 - Do not hand-roll a table, card, title block, or detail section when a visually similar sibling already exists. Use the sibling as a style donor and verify the match with node properties.
@@ -74,7 +76,7 @@ Review at least:
 - Scope: only approved areas changed; frozen areas preserved.
 - Layout: alignment, spacing, text overflow, icon/image visibility, table geometry, modal/drawer containment.
 - Text fit: run the text overflow audit for fixed-size text in single-line controls such as input placeholders, tabs, buttons, table headers, and table cells. Do not rely on scaled screenshots alone; short overflows are easy to miss.
-- Consistency: typography, color, border, radius, shadow, and component density match the detected page type and existing design system.
+- Consistency: typography, color, border, radius, shadow, copy tone, and component density match the detected page type and selected OST standard.
 - Similar-module parity: if two blocks have the same role, such as VAT detail and B2B detail, compare titles, header rows, body rows, cell fills, divider weights, padding, text alignment, and table frame strokes against the source block.
 - Semantic emphasis: verify alert or payable rows are the only nodes using alert colors; nearby normal rows must keep normal body color.
 - Visual artifacts: scan shell containers, table headers, and layout boundaries for accidental dark strokes or thin black fills introduced by capture or repair scripts.
@@ -88,7 +90,7 @@ If QA finds a problem inside the approved scope, fix it and re-check. If the fix
 
 - Read `references/scope-contract.md` before drafting the modification contract.
 - Read `references/confirmation-rules.md` before proposing inferred completion work.
-- Read `references/page-type-detection.md` when deciding whether the page is internal admin, merchant-facing, or unclear.
+- Read `references/page-type-detection.md` when deciding whether the page is OST admin/backend, OST user/merchant-facing, or unclear.
 - Read `references/layer-organization.md` before editing or creating Figma nodes and before final QA whenever the target frame may be flat or partially flat.
 - Read `references/style-consistency-audit.md` before editing repeated modules, tables, sections with matching titles, semantic color emphasis, or any captured frame that shows unexplained dark dividers.
 - Read `references/text-overflow-audit.md` before final QA whenever text, tables, filters, buttons, tabs, or column widths are created, moved, resized, or edited.
@@ -100,6 +102,7 @@ Include:
 
 - Modified Figma node link.
 - Modification mode: copied frame or original frame.
+- Page type and selected design standard.
 - Completed user-requested changes.
 - Approved suggestions that were executed.
 - Suggestions not executed.

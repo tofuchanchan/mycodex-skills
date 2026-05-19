@@ -9,7 +9,8 @@ Use this when proposing inferred completion work that the user did not explicitl
 - Adds, removes, or renames fields.
 - Changes business logic, workflow, validation, permissions, prices, tax/accounting concepts, status names, or button meaning.
 - Changes navigation, page hierarchy, global layout, or repeated components outside the edit area.
-- Applies a design standard that is not clearly the page's current standard.
+- Applies a design standard that differs from the recorded page type standard.
+- Switches between `ost-admin-system-guidelines` and `ost-user-system-guidelines`, or applies either standard while page type is still unclear.
 
 `Should confirm`
 
@@ -40,6 +41,7 @@ Please approve by ID, for example: "Approve S1 and S3; skip S2."
 ## Execution Rules
 
 - Execute only approved IDs.
+- Do not treat a requested visual polish as permission to switch admin/user standards. Standard switching requires explicit approval.
 - If an approved suggestion reveals a new dependency, stop and ask again.
 - If the user approves a vague group such as "all reasonable ones", restate the exact IDs and ask for confirmation.
 - Visual repairs may be bundled only when they are entirely inside the approved area and do not alter meaning.

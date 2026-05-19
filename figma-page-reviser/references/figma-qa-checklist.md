@@ -11,6 +11,7 @@ Run this after edits and after approved suggestions.
 - Style consistency findings for repeated modules or similar sections.
 - Visual artifact findings for unintended dark strokes, stray borders, or capture leftovers.
 - The confirmed scope contract.
+- The recorded page type and selected design standard.
 - List of approved suggestion IDs.
 
 ## Scope QA
@@ -48,8 +49,9 @@ Run this after edits and after approved suggestions.
 
 ## Page-Type QA
 
-- Internal admin pages keep dense, work-focused layouts and follow `ost-system-guidelines` when selected.
-- Merchant-facing pages keep user-facing guidance, readable form hierarchy, and the existing visual standard.
+- OST admin/backend pages keep dense, work-focused layouts and follow `ost-admin-system-guidelines` when selected.
+- OST user/merchant-facing pages keep user-facing guidance, readable form hierarchy, service/purchase/申报 page patterns, and follow `ost-user-system-guidelines` when selected.
+- Dense tables inside an OST user/merchant-facing page do not override the selected `ost-user-system-guidelines` standard.
 - If page type was unclear, the chosen review standard is recorded.
 
 ## Response Summary
