@@ -1,0 +1,4 @@
+interface:
+  display_name: "Figma Page Artifact Cleaner"
+  short_description: "Scan and safely clean local byproducts from Figma page reproduction or revision workflows."
+  default_prompt: "Use $figma-page-artifact-cleaner to scan local figma-page-reproducer/reviser artifacts, summarize cleanup candidates, and safely clean approved files."

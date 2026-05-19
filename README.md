@@ -8,6 +8,7 @@ A personal collection of Codex skills for AI-assisted workflows.
 | --- | --- | --- |
 | `figma-page-reproducer` | Reproduce logged-in web pages in Figma with high visual fidelity, icon-safe preprocessing, semantic layers, and OST admin/user page-standard routing. | https://github.com/tofuchanchan/mycodex-skills/tree/main/figma-page-reproducer |
 | `figma-page-reviser` | Revise reproduced Figma pages with scoped edits, semantic layer grouping, style consistency checks, text-fit QA, artifact cleanup, and OST admin/user page-standard routing. | https://github.com/tofuchanchan/mycodex-skills/tree/main/figma-page-reviser |
+| `figma-page-artifact-cleaner` | Scan and safely clean local screenshots, artifact files, and temporary Chrome/CDP profiles from Figma page reproduction or revision workflows. | https://github.com/tofuchanchan/mycodex-skills/tree/main/figma-page-artifact-cleaner |
 | `ost-admin-system-guidelines` | OST后台/admin system design guidelines for internal operations, management, finance, support, VAT, orders, and system pages. | https://github.com/tofuchanchan/mycodex-skills/tree/main/ost-admin-system-guidelines |
 | `ost-user-system-guidelines` | OST商户端/user system design guidelines for merchant workbench, purchase, orders, VAT tax numbers, VAT declaration, declaration detail, login, and 404 pages. | https://github.com/tofuchanchan/mycodex-skills/tree/main/ost-user-system-guidelines |
 
@@ -62,6 +63,10 @@ mycodex-skills/
     SKILL.md
     agents/
     references/
+  figma-page-artifact-cleaner/
+    SKILL.md
+    agents/
+    scripts/
   ost-admin-system-guidelines/
     SKILL.md
     agents/
