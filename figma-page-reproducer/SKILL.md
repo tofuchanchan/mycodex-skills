@@ -1,6 +1,6 @@
 ---
 name: figma-page-reproducer
-description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability/scope choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, effective business-content height detection, full-page or current-viewport capture decisions, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, watermark exclusion, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
+description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability/scope choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, effective business-content height detection, full-page or current-viewport capture decisions, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, layout-based Figma layer grouping, style-consistent repeated tables/sections, capture-artifact cleanup such as unintended black strokes, watermark exclusion, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
 ---
 
 # Figma Page Reproducer
@@ -31,9 +31,11 @@ Create a Figma prototype from the actual rendered web page, not from imagination
 10. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for normal-size editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved. For very long pages that require editability, skip whole-page capture and use the editable long-page strategy instead.
 11. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
 12. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
-13. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
-14. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, effective height, missing images, accidental overlays/watermarks, and obvious layout drift.
-15. Clean up local capture artifacts after validation so one-off browser profiles, helper scripts, logs, and process screenshots do not linger in the repo.
+13. Load `references/layer-organization.md` and run a semantic layer organization pass. Group captured nodes by page layout region and component purpose instead of leaving all generated rectangles/text/images flat at the frame root.
+14. Load `references/style-artifact-qa.md` and run a capture cleanup pass for repeated-module style consistency, semantic color scope, parent-relative coordinates, and unintended dark strokes.
+15. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
+16. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, effective height, missing images, accidental overlays/watermarks, obvious layout drift, similar section consistency, accidental dark borders, and layer tree organization.
+17. Clean up local capture artifacts after validation so one-off browser profiles, helper scripts, logs, and process screenshots do not linger in the repo.
 
 ## Tooling Pattern
 
@@ -196,6 +198,32 @@ Figma capture jobs can complete late. Treat old capture IDs as possible delayed 
 - `generate_figma_design` captures raw frames. If the user wants reusable production-quality prototypes later, replace repeated controls with design-system components after the raw capture is accepted.
 - Rename captured nodes immediately. Default names like `uat`, `Body`, and `Container` are useless.
 - Do not use bitmap screenshots as a fallback when the requested deliverable must be editable. Use screenshots only as explicit pixel references.
+- Do not leave a generated page as a flat pile of sibling nodes. After capture, create layout-based groups or frames with clear names such as `01 App Shell`, `02 Header`, `03 Navigation Tabs`, `04 Filter Panel`, `05 Action Toolbar`, `06 Data Table`, `07 Pagination`, and `90 Reference`.
+- Do not normalize every divider into a full `1px` box border. Preserve the source page's actual divider model, including one-sided strokes and thinner table grid lines.
+- Treat unexpected `#000000` strokes on large app-shell containers, top headers, sidebars, and table wrappers as capture artifacts unless the pixel reference clearly shows black dividers.
+- When reconstructing editable repeated sections, derive their style contract from an existing sibling section or row. Do not rebuild a matching table with a different border model, text padding, or header typography.
+
+## Layer Organization
+
+Read `references/layer-organization.md` before modifying the captured Figma node after `generate_figma_design` completes. The organization pass is required for editable reproductions unless the user explicitly asks for a raw capture only.
+
+At minimum:
+
+- Preserve the top-level frame dimensions and visual coordinates.
+- Group by semantic page regions, not by node type. A filter field's label, box, placeholder, suffix icon, and dropdown arrow belong together; they should not live as unrelated siblings beside table cells.
+- Keep repeated structures readable without over-nesting. For large tables, group at table/header/body/row level when useful, but do not create thousands of microscopic cell groups unless the user needs cell-level editability.
+- Report the layer organization strategy in the final answer.
+
+## Style and Artifact Cleanup
+
+Read `references/style-artifact-qa.md` after capture and before final validation. Use it when the generated frame contains repeated tables, detail sections, card lists, app-shell containers, or dark divider artifacts.
+
+At minimum:
+
+- Pick source analogues for repeated modules and compare row heights, cell widths, typography, fills, divider color, and individual side stroke weights.
+- Confirm text and icons use coordinates relative to their actual parent groups after regrouping.
+- Verify semantic emphasis colors only appear on the intended labels, values, rows, or badges.
+- Remove or replace unintended black strokes on sidebar/header/table boundaries while preserving real black text and icons.
 
 ## Local Artifact Cleanup
 
@@ -235,6 +263,10 @@ Before final response, confirm:
 - Main icons are visible in the Figma screenshot, not empty image boxes.
 - Repeated page watermarks are absent unless explicitly requested.
 - No accidental tutorial/chat/cookie overlay is present unless requested.
+- Top-level editable frame contains semantic layout groups, not only dozens or hundreds of flat primitive siblings.
+- Important repeated regions have useful names and hierarchy: navigation, header, tabs, filters, toolbars, table/list, modal/drawer, and reference screenshot.
+- Similar repeated sections and tables share the same style contract unless the pixel reference shows a deliberate difference.
+- Shell containers and table wrappers do not have unexplained dark borders or black capture artifacts.
 - Final answer links directly to the new Figma node and names the frame.
 
 ## Common Failure Modes
@@ -252,3 +284,5 @@ Before final response, confirm:
 - **Page state changed after refresh**: restore the requested UI state before capture.
 - **Floating overlay appeared**: hide it and recapture.
 - **Text mojibake in CDP JSON**: visual screenshot is authoritative; do not infer page quality from garbled console output.
+- **Generated black borders**: inspect large `Container` frames and table wrappers for `#000000` strokes; replace with the local divider color on the intended side or remove the stroke.
+- **Repeated section drift**: compare the generated section against its sibling source block; repair mismatched row height, padding, individual stroke weights, font style, and parent-relative text coordinates.
