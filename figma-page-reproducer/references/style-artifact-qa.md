@@ -5,6 +5,7 @@ Use this after `generate_figma_design` creates the editable frame and before the
 ## What To Check
 
 - App shell: sidebar, top header, page tabs, fixed footer, and major content panels.
+- Page type standard: internal admin pages use `ost-system-guidelines` when available; merchant-facing pages preserve the captured page's current visual system unless the user explicitly requested OST styling.
 - Repeated modules: tables, detail sections, filter fields, cards, toolbar buttons, menu items, and modal sections.
 - Semantic colors: red/payable/error, green/success, orange/warning, blue/primary actions.
 - Captured artifacts: unintended dark strokes, stray black lines, thin black rectangles, duplicated dividers, or blank image frames.
@@ -22,6 +23,18 @@ For each repeated region, choose a nearby source analogue and compare:
 - `textAutoResize` and parent-relative `x/y`
 
 If the source table uses right/bottom dividers, do not replace it with full box borders. If the source amount text is right aligned inside a cell, keep the text node inside that cell with local padding.
+
+## OST Admin QA
+
+When the page is internal admin/operations/backend and `ost-system-guidelines` is available, check the generated Figma output against it:
+
+- app shell: sidebar width, top header, navigation grouping, active states, and content area density
+- colors: primary blue, text colors, page background, card/table background, divider grey, success/warning/error colors
+- typography: title/body/auxiliary sizes and weights
+- components: tables, filters, inputs, selects, buttons, modals, cards, tags, and pagination
+- layout: compact spacing, card padding, table row height, form alignment, and repeated control consistency
+
+If the page is merchant-facing/customer-facing, do not enforce OST admin density or app-shell styling unless the user explicitly asks for it.
 
 ## Dark Stroke Cleanup
 
@@ -55,6 +68,7 @@ Mention any cleanup performed:
 
 ```text
 Style QA: matched repeated table sections against source table.
+Page type QA: internal admin, checked against ost-system-guidelines.
 Artifact cleanup: removed unintended black strokes from app-shell boundaries.
 Semantic color QA: payable/error colors are scoped to intended rows only.
 ```

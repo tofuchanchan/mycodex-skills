@@ -1,6 +1,6 @@
 ---
 name: figma-page-reproducer
-description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability/scope choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, effective business-content height detection, full-page or current-viewport capture decisions, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, layout-based Figma layer grouping, style-consistent repeated tables/sections, capture-artifact cleanup such as unintended black strokes, watermark exclusion, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
+description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and explicit editability/scope choices. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, effective business-content height detection, page-type detection for OST internal-admin standards, full-page or current-viewport capture decisions, long inner-scroll containers, editable module splitting, desktop viewport capture, Figma html-to-design capture, layout-based Figma layer grouping, style-consistent repeated tables/sections, capture-artifact cleanup such as unintended black strokes, watermark exclusion, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows.
 ---
 
 # Figma Page Reproducer
@@ -14,28 +14,32 @@ Create a Figma prototype from the actual rendered web page, not from imagination
 1. Confirm inputs: target page URL, target Figma file URL/key, scope, viewport, and whether the user will log in manually.
 2. Verify the active Figma account with `whoami`. If multiple Figma MCP namespaces are available, use the one whose email matches the user's expected account.
 3. Open a visible Chrome page with remote debugging when manual login is required. Let the user log in, then continue from that same authenticated tab.
-4. Inspect the live page dimensions, scroll containers, effective business-content bounds, watermark overlays, and icon sources before capture.
+4. Load `references/page-type-standards.md` and identify page type before applying design standards:
+   - For internal admin/operations/backend pages, use `ost-system-guidelines` when available as the review and reconstruction standard.
+   - For merchant-facing/customer-facing pages, preserve the current page's design system unless the user explicitly requests OST styling.
+   - If page type is unclear, ask the user to confirm the standard before restyling or reconstructing.
+5. Inspect the live page dimensions, scroll containers, effective business-content bounds, watermark overlays, and icon sources before capture.
    - Run `analyze-effective-bounds` for admin/SaaS pages before choosing frame height.
    - Do not blindly use `documentElement.scrollHeight`, `body.scrollHeight`, or `#app.scrollHeight` as the Figma frame height. These often include side navigation, footers, watermark overlays, and other shell content that should not define a page prototype.
    - If the analysis recommends `current-viewport`, use the requested desktop viewport height, usually `900`, unless the user explicitly wants full shell scroll.
-5. If the page or a primary inner container is significantly taller than the viewport, stop and offer the user a scope choice before capture. Do not hard-code a full-page or first-screen strategy for long list/detail pages.
+6. If the page or a primary inner container is significantly taller than the viewport, stop and offer the user a scope choice before capture. Do not hard-code a full-page or first-screen strategy for long list/detail pages.
    - If editability is required, do not use a full-page screenshot as the fallback. Split the page into editable modules and rebuild failed modules with Figma primitives/components.
-6. Preprocess icons before Figma capture:
+7. Preprocess icons before Figma capture:
    - Resolve `<svg><use href="#icon-...">` into real `symbol/path` content.
    - Rasterize visible inline SVG and iconfont symbols to PNG data URLs in the browser.
    - Convert Ant Design menu arrows or pseudo-element arrows to real PNG image nodes.
    - Verify `blankAfterRasterize = 0` or explain any intentional white-on-color icons.
-7. Hide unrelated transient overlays that were not part of the requested state, such as tutorials, chat popups, cookie banners, onboarding tips, theme/config drawers, and dev-only panels.
-8. Hide product watermarks before screenshot/capture. Admin systems often display username watermarks for security; they are real in the page but usually noise in a prototype unless the user explicitly asks to preserve them.
-9. Capture a local screenshot for the chosen scope as the pixel reference and visually inspect it before sending anything to Figma.
-10. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for normal-size editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved. For very long pages that require editability, skip whole-page capture and use the editable long-page strategy instead.
-11. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
-12. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
-13. Load `references/layer-organization.md` and run a semantic layer organization pass. Group captured nodes by page layout region and component purpose instead of leaving all generated rectangles/text/images flat at the frame root.
-14. Load `references/style-artifact-qa.md` and run a capture cleanup pass for repeated-module style consistency, semantic color scope, parent-relative coordinates, and unintended dark strokes.
-15. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
-16. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, effective height, missing images, accidental overlays/watermarks, obvious layout drift, similar section consistency, accidental dark borders, and layer tree organization.
-17. Clean up local capture artifacts after validation so one-off browser profiles, helper scripts, logs, and process screenshots do not linger in the repo.
+8. Hide unrelated transient overlays that were not part of the requested state, such as tutorials, chat popups, cookie banners, onboarding tips, theme/config drawers, and dev-only panels.
+9. Hide product watermarks before screenshot/capture. Admin systems often display username watermarks for security; they are real in the page but usually noise in a prototype unless the user explicitly asks to preserve them.
+10. Capture a local screenshot for the chosen scope as the pixel reference and visually inspect it before sending anything to Figma.
+11. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for normal-size editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved. For very long pages that require editability, skip whole-page capture and use the editable long-page strategy instead.
+12. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
+13. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
+14. Load `references/layer-organization.md` and run a semantic layer organization pass. Group captured nodes by page layout region and component purpose instead of leaving all generated rectangles/text/images flat at the frame root.
+15. Load `references/style-artifact-qa.md` and run a capture cleanup pass for repeated-module style consistency, semantic color scope, parent-relative coordinates, and unintended dark strokes.
+16. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison.
+17. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, effective height, missing images, accidental overlays/watermarks, obvious layout drift, page-type standard compliance, similar section consistency, accidental dark borders, and layer tree organization.
+18. Clean up local capture artifacts after validation so one-off browser profiles, helper scripts, logs, and process screenshots do not linger in the repo.
 
 ## Tooling Pattern
 
@@ -193,6 +197,7 @@ Figma capture jobs can complete late. Treat old capture IDs as possible delayed 
 ## Figma Capture Rules
 
 - For external authenticated sites, do not open a fresh unauthenticated URL for capture. Inject the capture script into the live logged-in tab.
+- Decide the page type before applying design standards. Internal admin pages should use `ost-system-guidelines` when available; merchant-facing pages should keep their current visual system unless the user explicitly asks otherwise.
 - Prefer `generate_figma_design` for the initial editable conversion, but treat it as a raw-frame capture, not a design-system-quality final component library.
 - Always use `figma-use` before `use_figma` calls.
 - `generate_figma_design` captures raw frames. If the user wants reusable production-quality prototypes later, replace repeated controls with design-system components after the raw capture is accepted.
@@ -263,6 +268,7 @@ Before final response, confirm:
 - Main icons are visible in the Figma screenshot, not empty image boxes.
 - Repeated page watermarks are absent unless explicitly requested.
 - No accidental tutorial/chat/cookie overlay is present unless requested.
+- Page type is recorded. If the page is internal admin/operations/backend, the final QA uses `ost-system-guidelines` for layout density, colors, typography, forms, tables, buttons, and app-shell consistency.
 - Top-level editable frame contains semantic layout groups, not only dozens or hundreds of flat primitive siblings.
 - Important repeated regions have useful names and hierarchy: navigation, header, tabs, filters, toolbars, table/list, modal/drawer, and reference screenshot.
 - Similar repeated sections and tables share the same style contract unless the pixel reference shows a deliberate difference.
@@ -286,3 +292,4 @@ Before final response, confirm:
 - **Text mojibake in CDP JSON**: visual screenshot is authoritative; do not infer page quality from garbled console output.
 - **Generated black borders**: inspect large `Container` frames and table wrappers for `#000000` strokes; replace with the local divider color on the intended side or remove the stroke.
 - **Repeated section drift**: compare the generated section against its sibling source block; repair mismatched row height, padding, individual stroke weights, font style, and parent-relative text coordinates.
+- **Wrong page standard**: do not apply `ost-system-guidelines` to merchant-facing pages by default. Apply it automatically only when the page is internal admin/operations/backend or the user explicitly requests it.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Figma Page Reproducer"
-  short_description: "Reproduce logged-in web pages in Figma with icon-safe capture, clean layers, and artifact QA."
-  default_prompt: "Reproduce this web page into Figma as a static prototype, preserving full-page layout, icons, semantic layer groups, repeated-section style consistency, and clean divider artifacts."
+  short_description: "Reproduce logged-in web pages in Figma with icon-safe capture, page-type standards, clean layers, and artifact QA."
+  default_prompt: "Reproduce this web page into Figma as a static prototype, preserving full-page layout and icons, detecting page type, using ost-system-guidelines for internal admin pages, and keeping semantic layer groups plus clean divider artifacts."
