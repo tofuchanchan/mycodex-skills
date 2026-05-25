@@ -1,6 +1,6 @@
 ---
 name: figma-page-reproducer
-description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and semantic layer organization. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, OST admin-vs-user page-type detection, full-page scrolling, desktop viewport capture, Figma html-to-design capture, layout-based Figma layer grouping, style-consistent repeated tables/sections, capture-artifact cleanup such as unintended black strokes, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows. Use `ost-admin-system-guidelines` for OST后台/admin pages and `ost-user-system-guidelines` for OST商户端/user pages.
+description: Reproduce an existing logged-in web page as a static Figma prototype with high visual fidelity and semantic layer organization. Use when the user asks Codex to call Figma to restore, capture, copy, recreate, reproduce, or prototype a real system page, especially pages requiring manual login, OST admin-vs-user page-type detection, full-page scrolling, desktop viewport capture, Figma html-to-design capture, layout-based Figma layer grouping, component-level grouping for buttons/fields/file chips/tabs, table-level grouping for header/body/rows/cells/operation links, style-consistent repeated tables/sections, capture-artifact cleanup such as unintended black strokes, or icon-safe handling for SVG iconfont, Ant Design icons, inline SVG, remote images, and CSS pseudo-element arrows. Use `ost-admin-system-guidelines` for OST后台/admin pages and `ost-user-system-guidelines` for OST商户端/user pages.
 ---
 
 # Figma Page Reproducer
@@ -31,7 +31,7 @@ Create a Figma prototype from the actual rendered web page, not from imagination
 9. Use Figma `generate_figma_design` with `outputMode: "existingFile"` for the editable capture. Inject the Figma capture script into the already-authenticated page through CDP so auth state is preserved.
 10. Poll the capture ID until Figma returns a completed node URL. Do not abandon polling just because the submit command times out; large pages often submit successfully after a terminal timeout.
 11. Rename the generated frame clearly, for example `Editable capture - <page name> - icons fixed PNG`.
-12. Load `references/layer-organization.md` and run a semantic layer organization pass. Group captured nodes by page layout region and component purpose instead of leaving all generated rectangles/text/images flat at the frame root.
+12. Load `references/layer-organization.md` and run a semantic layer organization pass. This is a two-level pass: first group major page regions, then group atomic controls and repeated table/list structures inside those regions. A result that only has large section groups while buttons, fields, table rows, table cells, file chips, and operation links remain loose siblings is not complete.
 13. Load `references/style-artifact-qa.md` and run a capture cleanup pass for repeated-module style consistency, semantic color scope, parent-relative coordinates, and unintended dark strokes.
 14. Add or keep a pixel reference screenshot frame when useful, especially for review or fidelity comparison; keep it outside the editable app frame or under a clearly named reference group.
 15. Validate the Figma result with `get_screenshot` and metadata. Check icon presence, viewport size, scroll height, missing images, accidental overlays, obvious layout drift, page-type standard compliance, similar section consistency, accidental dark borders, and layer tree organization.
@@ -59,6 +59,8 @@ Use `--cdp-port` if Chrome was launched on a non-default port. If a helper needs
 - `generate_figma_design` captures raw frames. If the user wants reusable production-quality prototypes later, replace repeated controls with design-system components after the raw capture is accepted.
 - Rename captured nodes immediately. Default names like `uat`, `Body`, and `Container` are useless.
 - Do not leave a generated page as a flat pile of sibling nodes. After capture, create layout-based groups or frames with clear names such as `01 App Shell`, `02 Header`, `03 Navigation Tabs`, `04 Filter Panel`, `05 Action Toolbar`, `06 Data Table`, `07 Pagination`, and `90 Reference`.
+- Macro groups alone are not enough. Inside every major region, group multi-node controls into editable component units: `button / 查询` should contain its background, label, icons, and loading mark; `field / 公司名称` should contain label, input box, value or placeholder, suffix icon, clear icon, and validation text; `file chip / 1-58522.pdf` should contain chip background, filename, remove icon, and status icon.
+- Tables and repeated lists need their own hierarchy instead of one giant table frame with loose text nodes. Create table chrome, header row, body, row groups, cell groups, operation cells, add-row buttons, summary/footer rows, and pagination groups when those structures exist.
 - Do not normalize every divider into a full `1px` box border. Preserve the source page's actual divider model, including one-sided strokes and thinner table grid lines.
 - Treat unexpected `#000000` strokes on large app-shell containers, top headers, sidebars, and table wrappers as capture artifacts unless the pixel reference clearly shows black dividers.
 - When reconstructing editable repeated sections, derive their style contract from an existing sibling section or row. Do not rebuild a matching table with a different border model, text padding, or header typography.
@@ -85,7 +87,8 @@ At minimum:
 
 - Preserve the top-level frame dimensions and visual coordinates.
 - Group by semantic page regions, not by node type. A filter field's label, box, placeholder, suffix icon, and dropdown arrow belong together; they should not live as unrelated siblings beside table cells.
-- Keep repeated structures readable without over-nesting. For large tables, group at table/header/body/row level when useful, but do not create thousands of microscopic cell groups unless the user needs cell-level editability.
+- Group atomic UI controls after region grouping. Buttons, inputs, selects, segmented controls, tabs, tags, alerts, file chips, status badges, amount inputs with suffixes, and operation links should become named groups or frames when they have more than one visual child.
+- Keep repeated structures readable without over-nesting. For large tables, group at table/header/body/row level, then group meaningful cell controls inside each row. Do not create one group per standalone text node or divider unless it is part of a cell/control that needs to move together.
 - Report the layer organization strategy in the final answer.
 
 ## Style and Artifact Cleanup
@@ -112,6 +115,7 @@ Before final response, confirm:
 - Page type is recorded. If the page is OST admin/operations/backend, final QA uses `ost-admin-system-guidelines` for layout density, colors, typography, forms, tables, buttons, and app-shell consistency. If the page is OST user/merchant-facing, final QA uses `ost-user-system-guidelines` for user-facing navigation, service cards, purchase/申报 flows, readable form hierarchy, status wording, and merchant-side component patterns.
 - Top-level editable frame contains semantic layout groups, not only dozens or hundreds of flat primitive siblings.
 - Important repeated regions have useful names and hierarchy: navigation, header, tabs, filters, toolbars, table/list, modal/drawer, and reference screenshot.
+- Component-level groups exist inside major regions. Buttons are not split into separate rectangle/text siblings; fields are not split into box/value/icon siblings; table rows and operation cells are not loose children of the table frame.
 - Similar repeated sections and tables share the same style contract unless the pixel reference shows a deliberate difference.
 - Shell containers and table wrappers do not have unexplained dark borders or black capture artifacts.
 - Final answer links directly to the new Figma node and names the frame.
@@ -124,6 +128,7 @@ Before final response, confirm:
 - **Page state changed after refresh**: restore the requested UI state before capture.
 - **Floating overlay appeared**: hide it and recapture.
 - **Text mojibake in CDP JSON**: visual screenshot is authoritative; do not infer page quality from garbled console output.
+- **Only macro grouping**: if the frame has groups for big blocks but loose child nodes for buttons, form controls, table rows, table cells, file chips, or operation links, run another organization pass. Big boxes with scattered parts are still bad layers, just wearing a fake mustache.
 - **Generated black borders**: inspect large `Container` frames and table wrappers for `#000000` strokes; replace with the local divider color on the intended side or remove the stroke.
 - **Repeated section drift**: compare the generated section against its sibling source block; repair mismatched row height, padding, individual stroke weights, font style, and parent-relative text coordinates.
 - **Wrong page standard**: do not apply `ost-admin-system-guidelines` to merchant/user pages, and do not apply `ost-user-system-guidelines` to internal admin pages. Classify first, then pick the matching OST standard; ask when classification is genuinely unclear.

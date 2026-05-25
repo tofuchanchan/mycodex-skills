@@ -41,11 +41,15 @@ Run this after edits and after approved suggestions.
 - Top-level frame dimensions are unchanged unless approved.
 - Child nodes remain inside expected parent frames.
 - New or modified nodes live inside semantic layout groups instead of loose top-level primitive layers.
+- Multi-node controls in the approved edit area are grouped as editable components: buttons, fields, selects, file chips, upload controls, notices, tabs, tags, status badges, and operation links.
+- Edited or optimized tables/lists have practical hierarchy: table chrome, header row/cells, body, row groups, meaningful cell groups, operation cells, add-row controls, summary/footer rows, and pagination when present.
+- Repeated rows or cards with the same visual pattern use parallel child hierarchy.
 - Z-order does not hide important controls.
 - Clipping, scroll areas, and fixed headers/footers remain coherent.
 - Auto layout changes, if any, do not collapse or stretch unrelated sections.
 - Text overflow fixes stay inside the approved area. If a required fix touches frozen areas, mark QA as `Needs confirmation`.
 - Layer regrouping stays inside the approved area. If the frame is globally flat but only a small area was approved, report the global layer issue separately instead of reorganizing everything.
+- QA cannot be `Pass` when a table wrapper still directly contains loose header texts, row values, field boxes, and operation links in the approved edit area. That is not layer organization; that is drawer stuffing with extra steps.
 
 ## Page-Type QA
 

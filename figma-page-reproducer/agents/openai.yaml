@@ -1,4 +1,4 @@
 interface:
   display_name: "Figma Page Reproducer"
-  short_description: "Reproduce web pages in Figma with icon-safe capture, OST admin/user standards, clean layers, and artifact QA."
-  default_prompt: "Reproduce this web page into Figma as a static prototype, preserving full-page layout and icons, detecting whether it is OST后台/admin or OST商户端/user, using ost-admin-system-guidelines for admin pages and ost-user-system-guidelines for user pages, and keeping semantic layer groups plus clean divider artifacts."
+  short_description: "Reproduce web pages in Figma with icon-safe capture, OST admin/user standards, component/table layer grouping, and artifact QA."
+  default_prompt: "Reproduce this web page into Figma as a static prototype, preserving full-page layout and icons, detecting whether it is OST后台/admin or OST商户端/user, using ost-admin-system-guidelines for admin pages and ost-user-system-guidelines for user pages, and keeping semantic layer groups down to component/table structures: group buttons, fields, file chips, table header/body/rows/cells, operation links, repeated controls, and clean divider artifacts."
