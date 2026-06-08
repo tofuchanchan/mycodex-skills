@@ -1,0 +1,4 @@
+interface:
+  display_name: "DingTalk Doc MCP Guidelines"
+  short_description: "Use DingTalk Doc MCP safely with JsonML structure and verification."
+  default_prompt: "Follow DingTalk Doc MCP read/write guidelines, using structured JsonML for formatting-sensitive document changes."
