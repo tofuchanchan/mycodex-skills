@@ -1,0 +1,30 @@
+{
+  "skill_name": "poland-vat-xml-auditor",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "客户本次确认有波兰以外的欧盟 VAT 号，并提供了 DE/CZ/ES/FR/IT 的自有 VAT 号配置。检查当前目录里的 JPK_V7M 和 VAT-UE XML，提取普通跨境B2B销售、采购、移仓出口、移仓进口，并告诉我两份文件有没有不一致。",
+      "expected_output": "应识别移仓出口和移仓进口，指出 VAT-UE Grupa2 字段命名风险，指出 JPK 与 VAT-UE 中德国进口税号不一致。"
+    },
+    {
+      "id": 2,
+      "prompt": "这两份 XML 是普通欧盟 B2B 销售和采购，没有提供任何非 PL 自有欧盟 VAT 号。帮我检查 JPK 和 UE 是否对应，不要乱判移仓。",
+      "expected_output": "应默认没有其他欧盟 VAT 号，不确认移仓；将 K_21 归为 B2B 销售，将 K_23/K_24 + K_42/K_43 归为 B2B 采购；公司名相似只能作为疑似风险。"
+    },
+    {
+      "id": 3,
+      "prompt": "帮我审计这组波兰 VAT XML，重点看金额汇总、税号、VAT-UE 是否漏报、JPK 自计税和抵扣是否成对。",
+      "expected_output": "若用户当前请求尚未回答是否有非 PL 自有欧盟 VAT 号，应先询问该 gate，不应依赖上下文、历史报告或配置文件直接运行审计。"
+    },
+    {
+      "id": 5,
+      "prompt": "目录里有 own_vat_config.json，你直接用配置帮我审计这组波兰 VAT XML。",
+      "expected_output": "即使存在配置文件，也应先询问本次客户是否有波兰以外的欧盟 VAT 号；配置文件不能代替本次 gate 回答。"
+    },
+    {
+      "id": 4,
+      "prompt": "客户确认没有波兰以外的欧盟 VAT 号。帮我审计这组波兰 VAT XML，重点看金额汇总、税号、VAT-UE 是否漏报、JPK 自计税和抵扣是否成对。",
+      "expected_output": "应使用 --own-vat-status none 运行脚本，输出归档目录名称包含税号、申报周期、当前日期和自增ID；报告摘要包含波兰税号和申报周期；extracted_transactions.csv 的 confidence 列为中文；reconciliation_issues.csv 的 detail 为中文。"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "taxpayer_nip": "5263243352",
+  "period": "2026-04",
+  "own_company_aliases": [
+    "SAYANO DEUTSCHLAND GMBH",
+    "STE SAYANO DEUTSCHLAND GMBH"
+  ],
+  "own_vat_ids": {
+    "DE": [
+      "312959814",
+      "341477507"
+    ],
+    "CZ": [
+      "684687494"
+    ],
+    "ES": [
+      "2765840J",
+      "N2765840J"
+    ],
+    "FR": [
+      "43847809951"
+    ],
+    "IT": [
+      "00334119997"
+    ]
+  },
+  "vat_rate": "0.23",
+  "rounding_tolerance_pln": "1"
+}

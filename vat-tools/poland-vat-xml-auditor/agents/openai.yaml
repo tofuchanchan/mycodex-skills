@@ -1,0 +1,4 @@
+interface:
+  display_name: "Poland VAT XML Auditor"
+  short_description: "Audit Polish VAT XML reconciliation risks."
+  default_prompt: "Use $poland-vat-xml-auditor to audit the Polish JPK_V7M and VAT-UE XML files in this folder, first asking whether the taxpayer has any non-PL EU VAT registrations."

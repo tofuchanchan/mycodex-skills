@@ -1,0 +1,17 @@
+{
+  "taxpayer_nip": "5263243352",
+  "period": "2026-04",
+  "own_vat_ids": {
+    "DE": [
+      "312959814"
+    ],
+    "CZ": [
+      "684687494"
+    ],
+    "ES": [
+      "2765840J"
+    ]
+  },
+  "vat_rate": "0.23",
+  "rounding_tolerance_pln": "1"
+}
