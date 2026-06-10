@@ -38,15 +38,15 @@ If yes, require country code + VAT ID. Company name or alias is optional and can
 Preferred format:
 
 ```text
-DE: 312959814
-CZ: 684687494
-ES: 2765840J
+DE: 888888888
+CZ: 88888888
+ES: N8888888J
 ```
 
 Optional alias format:
 
 ```text
-DE: 312959814, SAYANO DEUTSCHLAND GMBH
+DE: 888888888, FAKE VAT DEMO GMBH
 ```
 
 If the user provides only company names and no VAT IDs, treat the own-VAT gate as unresolved. Company names alone cannot confirm transfer.
@@ -124,7 +124,7 @@ PL{tax_number}_{reporting_period}_{YYYYMMDD}_{incrementing_id}
 Example:
 
 ```text
-audit-output/PL5263243352_2026-04_20260610_001/
+audit-output/PL8888888888_2026-04_20260610_001/
 ```
 
 If no config file exists and the user explicitly confirms there are no non-PL own EU VAT registrations, run:

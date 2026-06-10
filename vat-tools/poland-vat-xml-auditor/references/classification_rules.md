@@ -36,18 +36,18 @@ Example config:
 
 ```json
 {
-  "taxpayer_nip": "5263243352",
+  "taxpayer_nip": "8888888888",
   "period": "2026-04",
   "own_company_aliases": [
-    "SAYANO DEUTSCHLAND GMBH",
-    "STE SAYANO DEUTSCHLAND GMBH"
+    "FAKE VAT DEMO GMBH",
+    "DEMO EU TRADING GMBH"
   ],
   "own_vat_ids": {
-    "DE": ["312959814"],
-    "CZ": ["684687494"],
-    "ES": ["2765840J"],
-    "FR": ["43847809951"],
-    "IT": ["00334119997"]
+    "DE": ["888888888"],
+    "CZ": ["88888888"],
+    "ES": ["N8888888J"],
+    "FR": ["88888888888"],
+    "IT": ["88888888888"]
   },
   "vat_rate": "0.23",
   "rounding_tolerance_pln": "1"
