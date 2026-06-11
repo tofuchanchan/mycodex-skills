@@ -5,6 +5,7 @@ Run this after edits and after approved suggestions.
 ## Required Inputs
 
 - Current screenshot of the modified node.
+- Visual-semantic inventory for the approved or affected area: logo/wordmark, icons, promo tags, count badges, status chips, segmented steppers, warning/notice bars, and whether each item is in-scope or frozen.
 - Metadata for the modified node and important child nodes.
 - Text overflow audit findings for fixed-size single-line text.
 - Layer organization audit findings for the modified node or approved edit area.
@@ -33,6 +34,9 @@ Run this after edits and after approved suggestions.
 - Semantic colors are scoped to their intended meaning. Alert/payable red, success green, warning orange, and primary blue should not leak into neighboring normal rows or labels.
 - App-shell boundaries and table wrappers do not contain accidental dark strokes or thin black fills from capture or repair scripts.
 - Icons and images render; no blank placeholders or broken fills.
+- Logos and wordmarks in the approved or affected area are present; placeholder marks are failures unless they match the source.
+- Promo tags and count badges remain separate rounded child nodes. Do not merge `618狂欢` into a menu label or `60` into `VAT信件` text.
+- Segmented steppers keep the source corner model: first segment left radii, last segment right radii, middle segments square, plus original dividers, check icons, active indicators, and pointer shapes.
 - Tables keep coherent row height, column width, headers, dividers, and action alignment.
 - Modals/drawers/cards contain their content without overlap.
 
@@ -41,7 +45,7 @@ Run this after edits and after approved suggestions.
 - Top-level frame dimensions are unchanged unless approved.
 - Child nodes remain inside expected parent frames.
 - New or modified nodes live inside semantic layout groups instead of loose top-level primitive layers.
-- Multi-node controls in the approved edit area are grouped as editable components: buttons, fields, selects, file chips, upload controls, notices, tabs, tags, status badges, and operation links.
+- Multi-node controls in the approved edit area are grouped as editable components: buttons, fields, selects, file chips, upload controls, notices, tabs, tags, count badges, status badges, segmented steppers, and operation links.
 - Edited or optimized tables/lists have practical hierarchy: table chrome, header row/cells, body, row groups, meaningful cell groups, operation cells, add-row controls, summary/footer rows, and pagination when present.
 - Repeated rows or cards with the same visual pattern use parallel child hierarchy.
 - Z-order does not hide important controls.
@@ -50,6 +54,7 @@ Run this after edits and after approved suggestions.
 - Text overflow fixes stay inside the approved area. If a required fix touches frozen areas, mark QA as `Needs confirmation`.
 - Layer regrouping stays inside the approved area. If the frame is globally flat but only a small area was approved, report the global layer issue separately instead of reorganizing everything.
 - QA cannot be `Pass` when a table wrapper still directly contains loose header texts, row values, field boxes, and operation links in the approved edit area. That is not layer organization; that is drawer stuffing with extra steps.
+- QA cannot be `Pass` when metadata/text shows flattened component strings such as `购买服务 618狂欢`, `续费服务 618狂欢`, or `VAT信件 60` as one text node in the approved or affected area.
 
 ## Page-Type QA
 

@@ -18,7 +18,7 @@ Use this before editing a Figma page and again during final QA. A revision shoul
 - If the owner does not exist and the edit area is approved, create a local group or frame for the approved region before adding new nodes.
 - If grouping would touch frozen areas, ask before regrouping. Do not reorganize the whole file as a drive-by cleanup.
 - Preserve visual coordinates and z-order while regrouping.
-- Use a two-level model when the approved scope includes layer cleanup: first identify the major owner region, then group the controls and repeated table/list structures inside it. Big section groups with loose buttons and table cell parts are still bad layers wearing a cheap disguise.
+- Use a two-level model when the approved scope includes layer cleanup: first identify the major owner region, then group the controls and repeated table/list structures inside it. Big section groups with loose buttons, table cell parts, tags, badges, or stepper segments are still incomplete layer organization.
 - If the current target was produced by `figma-page-reproducer`, prefer improving existing captured nodes over recreating visuals.
 
 ## Naming
@@ -49,6 +49,10 @@ Select / 供应商税号
 Cell / 操作
 Button / 继续添加
 Summary Row / B2B Purchase Amount Total
+promo tag / 购买服务 / 618狂欢
+count bubble / VAT信件 / 60
+Segmented Stepper / 申报流程
+stepper segment / 1 填写数据
 ```
 
 Avoid raw generated names for newly created or repaired nodes. `Rectangle 143:2` is not a layer name; it is a cry for help.
@@ -72,6 +76,7 @@ When an approved edit area is flat:
 - Similar detail sections: one section group per business block, with a header sub-group and a table/card sub-group that mirrors the sibling section's hierarchy.
 - Modal/drawer: container, header, body, footer actions.
 - Sidebar: menu section groups and active item group.
+- Segmented stepper: outer stepper group, segment groups, dividers, check icons, active pointer, and step labels. The first segment owns left radii, the last segment owns right radii, and middle segments stay square unless the source shows otherwise.
 
 ## Atomic Component Rules
 
@@ -82,8 +87,9 @@ Within the approved edit area, group multi-node controls as editable units:
 - **Amount input**: numeric text, box, currency suffix/prefix, disabled fill, status outline, and validation marker. Name as `Input / <business purpose>`.
 - **File chip/upload control**: chip background, filename, remove icon, upload button, upload label, OCR/status icon, and progress text. Name as `File Chip / <file name>` or `Upload Control / <purpose>`.
 - **Alert/notice**: background, icon, title, body copy, link, and close icon. Name as `Notice / <purpose>`.
-- **Status/tag/link controls**: tag background plus text, link text plus icon, and operation link clusters such as `查看 / 编辑 / 删除`.
+- **Status/tag/badge/link controls**: tag or badge background plus text, link text plus icon, and operation link clusters such as `查看 / 编辑 / 删除`. Name promo labels as `promo tag / <owner> / <text>` and count bubbles as `count bubble / <owner> / <number>`.
 - **Navigation/menu/tab item**: item container, label, icon, badge, active indicator, and expand arrow.
+- **Segmented stepper**: outer track, segment backgrounds, text labels, check/status icons, dividers, and active pointer. Do not group each segment as a standalone pill when the source is one connected segmented control.
 
 A standalone text node can remain standalone when it truly acts alone. Once a box, icon, value, or status marker belongs with it, group the control. This is not philosophy; it is basic layer hygiene.
 
@@ -144,7 +150,7 @@ Before final response, inspect metadata and check:
 - Major layout regions are discoverable by name.
 - Top-level child count did not grow because of new primitive nodes.
 - Repaired areas have useful local grouping without over-nesting.
-- Multi-node controls in the approved edit area are grouped: buttons, fields, selects, notices, file chips, upload controls, tabs, tags, status badges, and operation links.
+- Multi-node controls in the approved edit area are grouped: buttons, fields, selects, notices, file chips, upload controls, tabs, tags, count badges, status badges, segmented steppers, and operation links.
 - Edited or optimized tables/lists are not just one wrapper with loose primitive children. They have table chrome/header/body/row/cell structure where row or cell editing matters.
 - Repeated rows or repeated cards have parallel child hierarchy when their visual pattern matches.
 - No frozen navigation/header/global areas were regrouped without approval.
@@ -157,3 +163,6 @@ Fix these before reporting `Pass`:
 - A table frame directly contains all headers, row values, dividers, and operation links.
 - Row 1 has useful groups but Row 2 remains flat despite sharing the same pattern.
 - A file chip background, filename, remove icon, and upload/OCR status are loose nodes.
+- A promo tag such as `618狂欢` is merged into its menu label instead of living as a rounded tag child.
+- A count bubble such as `60` is merged into `VAT信件` text instead of living as a badge child.
+- A segmented stepper is rebuilt as independent pill buttons with incorrect internal rounded corners.
