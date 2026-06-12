@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add PDF Background"
+  short_description: "Batch-add PDF backgrounds while preserving fields"
+  default_prompt: "Use $add-pdf-background to add a provided image as the background of PDF templates while preserving fields."

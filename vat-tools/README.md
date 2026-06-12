@@ -7,3 +7,4 @@ Codex skills for VAT XML parsing, audit, reconciliation, and tax-risk diagnostic
 | Skill | Description | Install URL |
 | --- | --- | --- |
 | `poland-vat-xml-auditor` | Audit Polish JPK_V7M and VAT-UE XML files, extract B2B and transfer transactions, reconcile files, and flag VAT reporting risks. | https://github.com/tofuchanchan/mycodex-skills/tree/main/vat-tools/poland-vat-xml-auditor |
+| `add-pdf-background` | Add a required JPG/PNG image as a PDF template background while preserving text, annotations, and form fields. | https://github.com/tofuchanchan/mycodex-skills/tree/main/vat-tools/add-pdf-background |
