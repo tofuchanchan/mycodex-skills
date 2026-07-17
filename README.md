@@ -16,6 +16,7 @@ Skills for product, UI, Figma, OST system design, and DingTalk document workflow
 | `dingtalk-doc-mcp-guidelines` | Use DingTalk Doc MCP safely for Alidocs read/write operations with JsonML structure and post-write verification. | https://github.com/tofuchanchan/mycodex-skills/tree/main/product-manager/dingtalk-doc-mcp-guidelines |
 | `ost-admin-system-guidelines` | OST admin/internal system design guidelines for operations, finance, support, VAT, orders, and system pages. | https://github.com/tofuchanchan/mycodex-skills/tree/main/product-manager/ost-admin-system-guidelines |
 | `ost-user-system-guidelines` | OST merchant/user system design guidelines for workbench, purchase, orders, VAT, declarations, login, and 404 pages. | https://github.com/tofuchanchan/mycodex-skills/tree/main/product-manager/ost-user-system-guidelines |
+| `visual-knowledge-explainer` | Turn PDFs, documents, code repositories, professional terms, and user outlines into layered visual explanations for business, product, and engineering audiences. | https://github.com/tofuchanchan/mycodex-skills/tree/main/product-manager/visual-knowledge-explainer |
 
 ### VAT Tools
 
@@ -60,6 +61,13 @@ Restart Codex after installing or updating a skill.
 ```text
 mycodex-skills/
   product-manager/
+    visual-knowledge-explainer/
+      SKILL.md
+      agents/
+      evals/
+      references/
+      scripts/
+      tests/
     figma-page-reproducer/
       SKILL.md
       agents/
