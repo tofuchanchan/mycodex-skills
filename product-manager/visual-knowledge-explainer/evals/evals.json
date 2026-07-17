@@ -1,0 +1,47 @@
+{
+  "skill": "visual-knowledge-explainer",
+  "version": 1,
+  "cases": [
+    {
+      "id": "pdf-to-all-formats",
+      "prompt": "阅读我提供的业务架构 PDF，直接生成面向业务、产品、研发的说明页面，同时输出目录版 HTML、单文件 HTML 和 PDF。",
+      "expected": [
+        "先逐页理解 PDF 并创建 explanation-brief.yaml",
+        "自动生成页面框架而不是要求用户先写大纲",
+        "精确关系路由到 Excalidraw，抽象概念按需路由到小黑",
+        "三种格式从同一份规范 HTML 派生",
+        "PDF 逐页渲染检查"
+      ]
+    },
+    {
+      "id": "repository-feature-logic",
+      "prompt": "解释当前代码仓库中订单重试功能的实现逻辑，生成 HTML 说明页，重点给产品和研发一起评审。",
+      "expected": [
+        "定位入口、调用链、状态、异常和测试证据",
+        "工程层包含可定位的文件或方法证据",
+        "调用链使用精确图而不是抽象插图",
+        "未找到的业务意图标记为 inferred 或 unknown"
+      ]
+    },
+    {
+      "id": "professional-term",
+      "prompt": "用一个可视化说明页解释什么是事件溯源 Event Sourcing，让业务、产品和研发都能看懂。",
+      "expected": [
+        "核验权威定义并记录外部来源",
+        "区分直觉类比、产品规则和工程实现",
+        "精确事件流与抽象心智模型不重复",
+        "默认交付 html-bundle"
+      ]
+    },
+    {
+      "id": "user-outline-augment",
+      "prompt": "按我给的大纲生成说明页：一、背景；二、参与角色；三、主流程。大纲不完整的部分你补齐，但不要改变现有顺序。输出单文件 HTML。",
+      "expected": [
+        "outline_policy 使用 augment",
+        "保留三个原章节的顺序和意图",
+        "补充缺失的工程证据、异常或边界章节",
+        "单文件 HTML 无外部运行时依赖"
+      ]
+    }
+  ]
+}
