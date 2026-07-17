@@ -1,0 +1,7 @@
+interface:
+  display_name: "可视化知识说明页"
+  short_description: "把材料、代码或术语转成分层 HTML、精确图、概念插图与 PDF"
+  default_prompt: "Use $visual-knowledge-explainer to 把我提供的材料生成面向业务、产品和研发的可视化说明页面。"
+policy:
+  allow_implicit_invocation: true
+
